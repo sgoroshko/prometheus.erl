@@ -552,11 +552,14 @@ key(Registry, Name, LabelValues) ->
 
 reduce_label_values(MFValues) ->
   lists:foldl(
-    fun([Labels | V], ResAcc) when is_map_key(Labels, ResAcc) ->
-        PrevSum = maps:get(Labels, ResAcc),
-        ResAcc#{Labels => [lists:sum(C) || C <- transpose([PrevSum, V])]};
-       ([Labels | V], ResAcc) ->
-        ResAcc#{Labels => V}
+    fun([Labels | V], ResAcc) ->
+      case maps:is_key(Labels, ResAcc) of
+         true ->
+           PrevSum = maps:get(Labels, ResAcc),
+           ResAcc#{Labels => [lists:sum(C) || C <- transpose([PrevSum, V])]};
+         false ->
+           ResAcc#{Labels => V}
+      end
     end, #{}, MFValues).
 
 mf_values(Registry, Name, MF) ->
